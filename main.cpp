@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <vector>
+//#include <vector>
 #include <thread>
 #include <fstream>
 #include <algorithm>
@@ -10,25 +10,31 @@ const size_t NUMBER_OF_THREADS = 4;
 
 using namespace std;
 
-string process_line(string in_line){
-    string out_line=in_line;
-
-    for(size_t i=0; i<out_line.size(); i++){
-        if (isdigit(out_line[i])){
-            int d = out_line[i] -'0';
-            if(d < 9){
-                out_line[i] = '0' + d + 1;
-            }else{
-                out_line[i] = '0';
-            }
-        }else if (isupper(out_line[i])){
-            out_line[i] = tolower(out_line[i]); tolower(out_line[i]);
-        }else{
-            out_line[i] = toupper(out_line[i]);
+void process_line(string& in_line){
+   // string out_line=in_line;
+    size_t size=in_line.size()
+    for(size_t i=0; i< size; i++)
+    {
+        if (isdigit(out_line[i]))
+        {
+           // int d = out_line[i] -'0';
+           // if(d < 9){
+             //   out_line[i] = '0' + d + 1;
+           // }else{
+            //    out_line[i] = '0';
+           // }
+            in_line[i] = (in_line[i] < '9') ? in_line[i] + 1 : '0';
         }
+        else 
+            in_line[i] = (isupper(in_line[i])) ? tolower(in_line[i]) : toupper(in_line[i]);
+            //if (isupper(out_line[i])){
+            //out_line[i] = tolower(out_line[i]); tolower(out_line[i]);
+       // }else{
+            //out_line[i] = toupper(out_line[i]);
+        //}
     }
 
-    return out_line;
+   // return out_line;
 }
 
 void process_thread(vector<string>& lines, size_t offset, size_t number_of_threads){
@@ -48,12 +54,19 @@ int main() {
             cout<<"Fail to open file!"<<endl;
             return 0;
         }
-
-        vector<string> lines;
+        ofstream out_file("../output_cpp.data");
+        //vector<string> lines;
         string buffer;
-        while(in_file >> buffer){
-            lines.push_back(buffer+"\n");
+        //while(in_file >> buffer){
+            //lines.push_back(buffer+"\n");
+        //}
+         while (in_file >> buffer)
+        {
+            process_line(buffer);
+            out_file << buffer;
+            out_file.flush();
         }
+        out_file.close();
         in_file.close();
 
         data_load = std::chrono::steady_clock::now();
@@ -66,17 +79,17 @@ int main() {
             thread_pool.emplace_back(process_thread, ref(lines), i ,NUMBER_OF_THREADS);
         }
 
-        cout<<"Wait for finish"<<endl;
-        for(auto& th : thread_pool){
-            th.join();
-        }
+        //cout<<"Wait for finish"<<endl;
+        //for(auto& th : thread_pool){
+            //th.join();
+       // }
 
         cout<<"Save output data"<<endl;
-        ofstream out_file("../output_cpp.data");
-        for(auto &line : lines){
-            out_file.write(line.c_str(), line.size());
-        }
-        out_file.close();
+        //ofstream out_file("../output_cpp.data");
+        //for(auto &line : lines){
+           // out_file.write(line.c_str(), line.size());
+        //}
+       // out_file.close();
 
         cout<<"Done"<<endl;
     }catch (const exception& e){
